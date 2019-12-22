@@ -3,6 +3,9 @@ package com.jpragma.dataloader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -87,6 +90,7 @@ class RowBuilder {
 class DataLoader {
     List<DataLoaderPlugin> plugins = new ArrayList<>();
     List<Table> tables = new ArrayList<>();
+
     void execute(Supplier<Connection> connectionSupplier) {
         applyPlugins();
         tables.forEach(table -> {
@@ -95,10 +99,45 @@ class DataLoader {
                     + " VALUES (" + join(table.columns, s -> "?") + ")";
             try {
                 PreparedStatement stmt = connectionSupplier.get().prepareStatement(sql);
+                table.rows.forEach(vals -> {
+                    try {
+                        for (int i = 0; i < vals.size(); i++) {
+                            setStatementValue(stmt, i + 1, vals.get(i));
+                        }
+                        stmt.execute();
+                        stmt.clearParameters();
+                    } catch (SQLException e) {
+                        toRuntime(e);
+                    }
+                });
             } catch (SQLException e) {
                 toRuntime(e);
             }
         });
+    }
+
+    @SuppressWarnings("rawtypes")
+    private void setStatementValue(PreparedStatement stmt, int index, Object val) throws SQLException {
+        if (val == null) {
+            throw new IllegalArgumentException("nulls values are not supported yet");
+        }
+        Class clazz = val.getClass();
+        if (clazz.equals(String.class)) {
+            stmt.setString(index, (String) val);
+        } else if (clazz.equals(Integer.class)) {
+            stmt.setInt(index, (Integer) val);
+        } else if (clazz.equals(Double.class)) {
+            stmt.setDouble(index, (Double) val);
+        } else if (clazz.equals(LocalDate.class)) {
+            stmt.setDate(index, new java.sql.Date(toEpochMilli(((LocalDate) val).atStartOfDay())));
+        } else {
+            throw new IllegalArgumentException(clazz + " is not supported yet");
+        }
+    }
+
+    private long toEpochMilli(LocalDateTime localDateTime) {
+        return localDateTime.atZone(ZoneId.systemDefault())
+                .toInstant().toEpochMilli();
     }
 
     private void toRuntime(SQLException e) {

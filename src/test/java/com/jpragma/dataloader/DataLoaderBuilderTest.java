@@ -1,13 +1,17 @@
 package com.jpragma.dataloader;
 
 
+import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -31,27 +35,42 @@ public class DataLoaderBuilderTest {
         PreparedStatement stmt1 = mock(PreparedStatement.class);
         when(mockConnection.prepareStatement(anyString())).thenReturn(stmt1);
         loader.execute(() -> mockConnection);
-        assertLoader(loader);
         verify(mockConnection).prepareStatement("INSERT INTO DEPARTMENT (DEP_ID,NAME,VERSION) VALUES (?,?,?)");
         verify(mockConnection).prepareStatement("INSERT INTO STUDENT (ID,NAME,DEP_ID,SCORE,DOB,VERSION) VALUES (?,?,?,?,?,?)");
     }
 
-    private void assertLoader(DataLoader loader) {
-        assertThat(loader.plugins).hasSize(1);
-        assertThat(loader.plugins.get(0)).isInstanceOf(DummyPlugin.class);
+    @Test
+    void insertDataIntoH2Table() throws SQLException {
+        Connection connection = inMemoryDataSource().getConnection();
+        executeDDL(connection);
+        new DataLoaderBuilder()
+                .table("CUSTOMER")
+                .columns("CUSTOMER_ID", "NAME", "DOB", "ACCOUNT_BALANCE", "CREATED_ON")
+                .row(1, "John Doe", LocalDate.parse("1980-05-14"), 187.78, LocalDate.parse("2019-12-22").atTime(14, 11))
+                .build()
+                .execute(() -> connection);
+        assertInsertedData(connection);
+    }
 
-        assertThat(loader.tables).hasSize(2);
+    private void assertInsertedData(Connection connection) throws SQLException {
+        ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM CUSTOMER");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt("CUSTOMER_ID")).isEqualTo(1);
+        assertThat(rs.getString("NAME")).isEqualTo("John Doe");
+        assertThat(rs.getDate("DOB").toLocalDate()).isEqualTo(LocalDate.parse("1980-05-14"));
+        assertThat(rs.getDouble("ACCOUNT_BALANCE")).isEqualTo(187.78);
 
-        Table tbl1 = loader.tables.get(0);
-        assertThat(tbl1.name).isEqualTo("DEPARTMENT");
-        assertThat(tbl1.columns).containsExactly("DEP_ID", "NAME", "VERSION");
-        assertThat(tbl1.rows).hasSize(1);
-        assertThat(tbl1.rows.get(0)).containsExactly(11, "CS", 0);
+    }
 
-        Table tbl2 = loader.tables.get(1);
-        assertThat(tbl2.name).isEqualTo("STUDENT");
-        assertThat(tbl2.columns).containsExactly("ID", "NAME", "DEP_ID", "SCORE", "DOB", "VERSION");
-        assertThat(tbl2.rows).hasSize(2);
+    private void executeDDL(Connection connection) throws SQLException {
+        String ddl = "CREATE TABLE CUSTOMER (CUSTOMER_ID INT, NAME VARCHAR(100), DOB DATE, ACCOUNT_BALANCE DOUBLE, CREATED_ON TIMESTAMP)";
+        connection.createStatement().execute(ddl);
+    }
+
+    private DataSource inMemoryDataSource() {
+        JdbcDataSource dataSource = new JdbcDataSource();
+        dataSource.setUrl("jdbc:h2:mem:");
+        return dataSource;
     }
 
     static class DummyPlugin implements DataLoaderPlugin {
