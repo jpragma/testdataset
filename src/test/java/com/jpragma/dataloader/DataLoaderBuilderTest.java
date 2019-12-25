@@ -45,8 +45,8 @@ public class DataLoaderBuilderTest {
         executeDDL(connection);
         new DataLoaderBuilder()
                 .table("CUSTOMER")
-                .columns("CUSTOMER_ID", "NAME", "DOB", "ACCOUNT_BALANCE", "CREATED_ON")
-                .row(1, "John Doe", LocalDate.parse("1980-05-14"), 187.78, LocalDate.parse("2019-12-22").atTime(14, 11))
+                .columns("CUSTOMER_ID", "NAME", "DOB", "ACCOUNT_BALANCE", "CREATED_ON", "RANK")
+                .row(1, "John Doe", LocalDate.parse("1980-05-14"), 187.78, LocalDate.parse("2019-12-22").atTime(14, 11), null)
                 .build()
                 .execute(() -> connection);
         assertInsertedData(connection);
@@ -59,11 +59,11 @@ public class DataLoaderBuilderTest {
         assertThat(rs.getString("NAME")).isEqualTo("John Doe");
         assertThat(rs.getDate("DOB").toLocalDate()).isEqualTo(LocalDate.parse("1980-05-14"));
         assertThat(rs.getDouble("ACCOUNT_BALANCE")).isEqualTo(187.78);
-
+        assertThat(rs.getObject("RANK")).isNull();
     }
 
     private void executeDDL(Connection connection) throws SQLException {
-        String ddl = "CREATE TABLE CUSTOMER (CUSTOMER_ID INT, NAME VARCHAR(100), DOB DATE, ACCOUNT_BALANCE DOUBLE, CREATED_ON TIMESTAMP)";
+        String ddl = "CREATE TABLE CUSTOMER (CUSTOMER_ID INT, NAME VARCHAR(100), DOB DATE, ACCOUNT_BALANCE DOUBLE, CREATED_ON TIMESTAMP, RANK INT NULL)";
         connection.createStatement().execute(ddl);
     }
 

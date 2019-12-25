@@ -119,19 +119,24 @@ class DataLoader {
     @SuppressWarnings("rawtypes")
     private void setStatementValue(PreparedStatement stmt, int index, Object val) throws SQLException {
         if (val == null) {
-            throw new IllegalArgumentException("nulls values are not supported yet");
-        }
-        Class clazz = val.getClass();
-        if (clazz.equals(String.class)) {
-            stmt.setString(index, (String) val);
-        } else if (clazz.equals(Integer.class)) {
-            stmt.setInt(index, (Integer) val);
-        } else if (clazz.equals(Double.class)) {
-            stmt.setDouble(index, (Double) val);
-        } else if (clazz.equals(LocalDate.class)) {
-            stmt.setDate(index, new java.sql.Date(toEpochMilli(((LocalDate) val).atStartOfDay())));
+            stmt.setObject(index, null);
         } else {
-            throw new IllegalArgumentException(clazz + " is not supported yet");
+            Class clazz = val.getClass();
+            if (clazz.equals(String.class)) {
+                stmt.setString(index, (String) val);
+            } else if (clazz.equals(Integer.class)) {
+                stmt.setInt(index, (Integer) val);
+            } else if (clazz.equals(Long.class)) {
+                stmt.setLong(index, (Long) val);
+            } else if (clazz.equals(Double.class)) {
+                stmt.setDouble(index, (Double) val);
+            } else if (clazz.equals(LocalDate.class)) {
+                stmt.setDate(index, new java.sql.Date(toEpochMilli(((LocalDate) val).atStartOfDay())));
+            } else if (clazz.equals(LocalDateTime.class)) {
+                stmt.setDate(index, new java.sql.Date(toEpochMilli(((LocalDateTime) val))));
+            } else {
+                throw new IllegalArgumentException(clazz + " is not supported yet");
+            }
         }
     }
 
