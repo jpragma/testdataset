@@ -1,9 +1,10 @@
-package com.jpragma.dataloader;
+package com.jpragma.dataloader.test;
 
-
+import com.jpragma.dataloader.DataLoader;
+import com.jpragma.dataloader.DataLoaderBuilder;
+import com.jpragma.dataloader.DataLoaderPlugin;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -11,17 +12,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public class DataLoaderBuilderTest {
 
     @Test
     void dataLoaderCreatesProperStatement() throws SQLException {
-        DataLoader loader = new DataLoaderBuilder()
+        Connection mockConnection = mock(Connection.class);
+        PreparedStatement stmt1 = mock(PreparedStatement.class);
+        when(mockConnection.prepareStatement(anyString())).thenReturn(stmt1);
+
+        DataLoader loader = new DataLoaderBuilder(() -> mockConnection)
                 .plugin(new DummyPlugin())
                 .table("DEPARTMENT")
                 .columns("DEP_ID", "NAME")
@@ -31,10 +35,7 @@ public class DataLoaderBuilderTest {
                 .row(1, "John Doe", 11, 92.2, LocalDate.parse("1995-06-12"))
                 .row(2, "Jane Roe", 11, 98.3, LocalDate.parse("2000-01-23"))
                 .build();
-        Connection mockConnection = mock(Connection.class);
-        PreparedStatement stmt1 = mock(PreparedStatement.class);
-        when(mockConnection.prepareStatement(anyString())).thenReturn(stmt1);
-        loader.execute(() -> mockConnection);
+        loader.load();
         verify(mockConnection).prepareStatement("INSERT INTO DEPARTMENT (DEP_ID,NAME,VERSION) VALUES (?,?,?)");
         verify(mockConnection).prepareStatement("INSERT INTO STUDENT (ID,NAME,DEP_ID,SCORE,DOB,VERSION) VALUES (?,?,?,?,?,?)");
     }
@@ -43,12 +44,12 @@ public class DataLoaderBuilderTest {
     void insertDataIntoH2Table() throws SQLException {
         Connection connection = inMemoryDataSource().getConnection();
         executeDDL(connection);
-        new DataLoaderBuilder()
+        new DataLoaderBuilder(() -> connection)
                 .table("CUSTOMER")
                 .columns("CUSTOMER_ID", "NAME", "DOB", "ACCOUNT_BALANCE", "CREATED_ON", "RANK")
                 .row(1, "John Doe", LocalDate.parse("1980-05-14"), 187.78, LocalDate.parse("2019-12-22").atTime(14, 11), null)
                 .build()
-                .execute(() -> connection);
+                .load();
         assertInsertedData(connection);
     }
 
