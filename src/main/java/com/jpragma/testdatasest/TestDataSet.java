@@ -1,4 +1,4 @@
-package com.jpragma.dataloader;
+package com.jpragma.testdatasest;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

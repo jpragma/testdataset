@@ -1,8 +1,8 @@
-package com.jpragma.dataloader.test;
+package com.jpragma.testdatasest.test;
 
-import com.jpragma.dataloader.TestDataSet;
-import com.jpragma.dataloader.TestDataSetBuilder;
-import com.jpragma.dataloader.TestDataSetPlugin;
+import com.jpragma.testdatasest.TestDataSet;
+import com.jpragma.testdatasest.TestDataSetBuilder;
+import com.jpragma.testdatasest.TestDataSetPlugin;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.Test;
 
@@ -17,15 +17,15 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class TestDataSetBuilderTest {
+public class DataSetIntegrationTest {
 
     @Test
-    void dataLoaderCreatesProperStatement() throws SQLException {
+    void dataSetCreatesProperStatement() throws SQLException {
         Connection mockConnection = mock(Connection.class);
         PreparedStatement stmt1 = mock(PreparedStatement.class);
         when(mockConnection.prepareStatement(anyString())).thenReturn(stmt1);
 
-        TestDataSet loader = new TestDataSetBuilder(() -> mockConnection)
+        TestDataSet tds = new TestDataSetBuilder(() -> mockConnection)
                 .plugin(new DummyPlugin())
                 .table("DEPARTMENT")
                 .columns("DEP_ID", "NAME")
@@ -35,7 +35,7 @@ public class TestDataSetBuilderTest {
                 .row(1, "John Doe", 11, 92.2, LocalDate.parse("1995-06-12"))
                 .row(2, "Jane Roe", 11, 98.3, LocalDate.parse("2000-01-23"))
                 .build();
-        loader.load();
+        tds.load();
         verify(mockConnection).prepareStatement("INSERT INTO DEPARTMENT (DEP_ID,NAME,VERSION) VALUES (?,?,?)");
         verify(mockConnection).prepareStatement("INSERT INTO STUDENT (ID,NAME,DEP_ID,SCORE,DOB,VERSION) VALUES (?,?,?,?,?,?)");
     }

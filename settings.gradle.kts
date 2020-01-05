@@ -1,1 +1,1 @@
-rootProject.name = "testdataloader"
+rootProject.name = "testdataset"
