@@ -6,15 +6,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class DataLoaderBuilder {
-    final DataLoader dataLoader;
+public class TestDataSetBuilder {
+    final TestDataSet testDataSet;
 
-    public DataLoaderBuilder(Supplier<Connection> connectionSupplier) {
-        dataLoader  = new DataLoader(connectionSupplier);
+    public TestDataSetBuilder(Supplier<Connection> connectionSupplier) {
+        testDataSet = new TestDataSet(connectionSupplier);
     }
 
-    public DataLoaderBuilder plugin(DataLoaderPlugin plugin) {
-        dataLoader.plugins.add(plugin);
+    public TestDataSetBuilder plugin(TestDataSetPlugin plugin) {
+        testDataSet.plugins.add(plugin);
         return this;
     }
 
@@ -23,11 +23,11 @@ public class DataLoaderBuilder {
     }
 
     public static class TableBuilder {
-        private final DataLoaderBuilder dataLoaderBuilder;
+        private final TestDataSetBuilder testDataSetBuilder;
         private final Table table;
 
-        private TableBuilder(DataLoaderBuilder builder, String name) {
-            this.dataLoaderBuilder = builder;
+        private TableBuilder(TestDataSetBuilder builder, String name) {
+            this.testDataSetBuilder = builder;
             this.table = new Table();
             table.name = name;
         }
@@ -39,16 +39,16 @@ public class DataLoaderBuilder {
 
         public TableBuilder andAnotherTable(String name) {
             saveCurrentTableDef();
-            return new TableBuilder(dataLoaderBuilder, name);
+            return new TableBuilder(testDataSetBuilder, name);
         }
 
-        public DataLoader build() {
+        public TestDataSet build() {
             saveCurrentTableDef();
-            return dataLoaderBuilder.dataLoader;
+            return testDataSetBuilder.testDataSet;
         }
 
         private void saveCurrentTableDef() {
-            dataLoaderBuilder.dataLoader.tables.add(table);
+            testDataSetBuilder.testDataSet.tables.add(table);
         }
     }
 
@@ -77,7 +77,7 @@ public class DataLoaderBuilder {
             return tableBuilder.andAnotherTable(name);
         }
 
-        public DataLoader build() {
+        public TestDataSet build() {
             return tableBuilder.build();
         }
     }

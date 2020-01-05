@@ -12,12 +12,12 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-public class DataLoader {
-    final List<DataLoaderPlugin> plugins = new ArrayList<>();
-    final List<DataLoaderBuilder.Table> tables = new ArrayList<>();
+public class TestDataSet {
+    final List<TestDataSetPlugin> plugins = new ArrayList<>();
+    final List<TestDataSetBuilder.Table> tables = new ArrayList<>();
     final Supplier<Connection> connectionSupplier;
 
-    DataLoader(Supplier<Connection> connectionSupplier) {
+    TestDataSet(Supplier<Connection> connectionSupplier) {
         // package-private constructor, only builder can create this class
         this.connectionSupplier = connectionSupplier;
     }

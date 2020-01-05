@@ -1,8 +1,8 @@
 package com.jpragma.dataloader.test;
 
-import com.jpragma.dataloader.DataLoader;
-import com.jpragma.dataloader.DataLoaderBuilder;
-import com.jpragma.dataloader.DataLoaderPlugin;
+import com.jpragma.dataloader.TestDataSet;
+import com.jpragma.dataloader.TestDataSetBuilder;
+import com.jpragma.dataloader.TestDataSetPlugin;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class DataLoaderBuilderTest {
+public class TestDataSetBuilderTest {
 
     @Test
     void dataLoaderCreatesProperStatement() throws SQLException {
@@ -25,7 +25,7 @@ public class DataLoaderBuilderTest {
         PreparedStatement stmt1 = mock(PreparedStatement.class);
         when(mockConnection.prepareStatement(anyString())).thenReturn(stmt1);
 
-        DataLoader loader = new DataLoaderBuilder(() -> mockConnection)
+        TestDataSet loader = new TestDataSetBuilder(() -> mockConnection)
                 .plugin(new DummyPlugin())
                 .table("DEPARTMENT")
                 .columns("DEP_ID", "NAME")
@@ -44,7 +44,7 @@ public class DataLoaderBuilderTest {
     void insertDataIntoH2Table() throws SQLException {
         Connection connection = inMemoryDataSource().getConnection();
         executeDDL(connection);
-        new DataLoaderBuilder(() -> connection)
+        new TestDataSetBuilder(() -> connection)
                 .table("CUSTOMER")
                 .columns("CUSTOMER_ID", "NAME", "DOB", "ACCOUNT_BALANCE", "CREATED_ON", "RANK")
                 .row(1, "John Doe", LocalDate.parse("1980-05-14"), 187.78, LocalDate.parse("2019-12-22").atTime(14, 11), null)
@@ -74,7 +74,7 @@ public class DataLoaderBuilderTest {
         return dataSource;
     }
 
-    static class DummyPlugin implements DataLoaderPlugin {
+    static class DummyPlugin implements TestDataSetPlugin {
         @Override
         public void modifyColumns(List<String> columns) {
             columns.add("VERSION");
