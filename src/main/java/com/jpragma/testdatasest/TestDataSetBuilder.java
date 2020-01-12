@@ -6,6 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * Builder that provides DSL for creation of TestDataSet.
+ * Start by calling plugin() or table()
+ */
 public class TestDataSetBuilder {
     final TestDataSet testDataSet;
 
@@ -13,11 +17,21 @@ public class TestDataSetBuilder {
         testDataSet = new TestDataSet(connectionSupplier);
     }
 
+    /**
+     * Plugins will be applied in the same order they added
+     * @param plugin Plugin that modifies columns and rows
+     * @return "this" for chaining calls
+     */
     public TestDataSetBuilder plugin(TestDataSetPlugin plugin) {
         testDataSet.plugins.add(plugin);
         return this;
     }
 
+    /**
+     * Table to be populated
+     * @param name table name
+     * @return "this" for chaining calls
+     */
     public TableBuilder table(String name) {
         return new TableBuilder(this, name);
     }
@@ -32,6 +46,11 @@ public class TestDataSetBuilder {
             table.name = name;
         }
 
+        /**
+         * List of columns to be populated
+         * @param names names of columns
+         * @return RowBuilder
+         */
         public RowBuilder columns(String... names) {
             table.columns = new ArrayList<>(Arrays.asList(names));
             return new RowBuilder(this, table);
@@ -61,6 +80,10 @@ public class TestDataSetBuilder {
             this.table = table;
         }
 
+        /**
+         * @param values Values of individual row to be inserted
+         * @return Another RowBuilder for chaining calls
+         */
         public RowBuilder row(Object... values) {
             validateSizeMatchesColumns(values.length, table.columns.size());
             table.rows.add(new ArrayList<>(Arrays.asList(values)));
@@ -77,6 +100,10 @@ public class TestDataSetBuilder {
             return tableBuilder.andAnotherTable(name);
         }
 
+        /**
+         * Creates ready to use TestDataSet
+         * @return TestDataSet
+         */
         public TestDataSet build() {
             return tableBuilder.build();
         }

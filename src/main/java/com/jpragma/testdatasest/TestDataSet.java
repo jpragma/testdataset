@@ -22,6 +22,9 @@ public class TestDataSet {
         this.connectionSupplier = connectionSupplier;
     }
 
+    /**
+     * Actually loads test data into the database
+     */
     public void load() {
         applyPlugins();
         tables.forEach(table -> {

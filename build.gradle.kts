@@ -1,12 +1,14 @@
 import org.gradle.api.JavaVersion.VERSION_1_8
 
 plugins {
-    java
+    `java-library`
     `maven-publish`
+    id("com.jfrog.bintray") version "1.7.3"
 }
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 group = "com.jpragma"
@@ -17,6 +19,8 @@ val junitVer = "5.5.2"
 java {
     sourceCompatibility = VERSION_1_8
     targetCompatibility = VERSION_1_8
+    withSourcesJar()
+    withJavadocJar()
 }
 
 
