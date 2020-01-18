@@ -3,7 +3,7 @@ import org.gradle.api.JavaVersion.VERSION_1_8
 plugins {
     `java-library`
     `maven-publish`
-    id("com.jfrog.bintray") version "1.7.3"
+    id("com.jfrog.bintray") version "1.8.1"
 }
 
 repositories {
@@ -12,7 +12,8 @@ repositories {
 }
 
 group = "com.jpragma"
-version = "0.0.1-SNAPSHOT"
+val artifactId = "testdataset"
+version = "0.0.1"
 
 val junitVer = "5.5.2"
 
@@ -39,7 +40,37 @@ tasks.test {
 publishing {
     publications {
         create<MavenPublication>("default") {
+            groupId = project.group as String
+            artifactId = "testdataset"
+            version = project.version as String
             from(components["java"])
+            pom.withXml {
+                asNode().apply {
+                    appendNode("description", "Library to load test data to DB")
+                    appendNode("licenses").appendNode("license").apply {
+                        appendNode("name", "The Apache Software License, Version 2.0")
+                        appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        appendNode("distribution", "repo")
+                    }
+                }
+            }
         }
     }
+}
+
+fun findProperty(s: String) = project.findProperty(s) as String?
+
+bintray {
+    user = findProperty("bintrayUser")
+    key = findProperty("bintrayApiKey")
+    publish = true
+    setPublications("default")
+    pkg(delegateClosureOf<com.jfrog.bintray.gradle.BintrayExtension.PackageConfig>{
+        repo = "jprmvn"
+        name = "testdataset"
+        userOrg = "jpragma"
+        vcsUrl = "https://github.com/jpragma/testdataset"
+        setLabels("java")
+        setLicenses("Apache-2.0")
+    })
 }
