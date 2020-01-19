@@ -1,6 +1,8 @@
 **TestDataSet** is a simple java library that helps to populate tables 
 in your relational database when writing unit/integration tests.
 
+![](https://github.com/jpragma/testdataset/workflows/build/badge.svg)
+
 ## Quick start
 
 1. Create *TestDataSetBuilder* passing provider of *java.sql.Connection* to its constructor
