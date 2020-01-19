@@ -4,6 +4,7 @@ plugins {
     `java-library`
     `maven-publish`
     id("com.jfrog.bintray") version "1.8.1"
+    id("pl.allegro.tech.build.axion-release") version "1.10.3"
 }
 
 repositories {
@@ -13,7 +14,7 @@ repositories {
 
 group = "com.jpragma"
 val artifactId = "testdataset"
-version = "0.0.1"
+version = scmVersion.version
 
 val junitVer = "5.5.2"
 
