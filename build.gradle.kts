@@ -47,11 +47,24 @@ publishing {
             from(components["java"])
             pom.withXml {
                 asNode().apply {
+                    appendNode("name", "TestDataSet")
                     appendNode("description", "Library to load test data to DB")
+                    appendNode("url", "https://github.com/jpragma/testdataset")
                     appendNode("licenses").appendNode("license").apply {
                         appendNode("name", "The Apache Software License, Version 2.0")
                         appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
                         appendNode("distribution", "repo")
+                    }
+                    appendNode("developers").appendNode("developer").apply {
+                        appendNode("name", "Isaac Levin")
+                        appendNode("email", "ilevin@jpragma.com")
+                        appendNode("organization", "JPragma")
+                        appendNode("organizationUrl", "http://blog.jpragma.com/")
+                    }
+                    appendNode("scm").apply {
+                        appendNode("connection", "scm:git:git://github.com/jpragma/testdataset.git")
+                        appendNode("developerConnection", "scm:git:ssh://github.com/jpragma/testdataset.git")
+                        appendNode("url", "https://github.com/jpragma/testdataset")
                     }
                 }
             }
