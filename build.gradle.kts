@@ -16,7 +16,7 @@ group = "com.jpragma"
 val artifactId = "testdataset"
 version = scmVersion.version
 
-val junitVer = "5.5.2"
+val junitVer = "5.6.0"
 
 java {
     sourceCompatibility = VERSION_1_8
@@ -29,8 +29,8 @@ java {
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVer")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVer")
-    testImplementation("org.mockito:mockito-core:3.0.0")
-    testImplementation("org.assertj:assertj-core:3.13.2")
+    testImplementation("org.mockito:mockito-core:3.2.4")
+    testImplementation("org.assertj:assertj-core:3.15.0")
     testImplementation("com.h2database:h2:1.4.200")
 }
 
